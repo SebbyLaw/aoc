@@ -1,3 +1,6 @@
+from functools import cache
+import os
+from pathlib import Path
 from typing import Any, Callable, TypeAlias
 
 from aocd import _impartial_submit, get_data
@@ -14,6 +17,14 @@ Solution: TypeAlias = Callable[[str], str | int]
 DecoratesSolution: TypeAlias = Callable[[Solution], Solution]
 
 
+@cache
+def get_day_and_year(func: Solution, /) -> tuple[int, int]:
+    path = Path(func.__code__.co_filename)
+    year = int(path.parent.name)
+    day = int(path.parts[-1][:-3])
+    return day, year
+
+
 class Runner:
     __slots__ = ("calls",)
 
@@ -22,7 +33,8 @@ class Runner:
 
     @staticmethod
     def _actual_runner(func: Solution, /):
-        answer = func(get_data())
+        day, year = get_day_and_year(func)
+        answer = func(get_data(day=day, year=year))
         print(f"Result for {func.__name__}: {answer}")
 
     def __call__(self, func: Solution, /) -> Solution:
@@ -46,13 +58,16 @@ run = Runner()
 def submit(func: Solution, /) -> Solution:
     part = func.__name__[0]
 
-    answer = func(get_data())
+    day, year = get_day_and_year(func)
+    answer = func(get_data(day=day, year=year))
 
     _impartial_submit(
         answer,
         part=part,
         reopen=True,
         quiet=False,
+        day=day,
+        year=year,
     )
 
     return func
