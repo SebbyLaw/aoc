@@ -1,0 +1,10 @@
+{
+    "code-runner.executorMap": {
+        "python": "PYTHONPATH=\"$workspaceRoot\" \"$pythonPath\" -u $fullFileName"
+    },
+    "code-runner.saveFileBeforeRun": true,
+    "code-runner.runInTerminal": true,
+    "code-runner.ignoreSelection": true,
+    "code-runner.showExecutionMessage": false,
+    "code-runner.enableAppInsights": false
+}
