@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "aoc"
+version = "0.1.0"
+description = "Advent of Code"
+authors = ["Sebastian Law <sebnlaw@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+networkx = "^3.2.1"
+infinite-sets = "^1.0.2"
+sortedcontainers = "^2.4.0"
+advent-of-code-data = "^2.0.1"
+typing-extensions = "^4.8.0"
+numpy = "^1.26.2"
+more-itertools = "^10.1.0"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.11.0"
+browser-cookie3 = "^0.19.1"
+isort = "^5.12.0"
+pyright = "^1.1.336"
+pre-commit = "^3.5.0"
+wheel = "^0.41.3"
+setuptools = "^68.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+ignore = ["E501", "F403", "F405"]
+
+[tool.pyright]
+exclude = ["spark/platforms/discord/grid_job_message.py"]
+reportUnusedVariable = "warning"
+reportUnusedFunction = "warning"
+reportUnusedClass = "warning"
+reportUnusedImport = "warning"
+reportDuplicateImport = "warning"
+reportUnnecessaryIsInstance = "warning"
+reportUnnecessaryComparison = "information"
+reportUnusedExpression = "warning"
+reportUnusedCoroutine = "warning"
+reportUnnecessaryTypeIgnoreComment = "warning"
+reportMatchNotExhaustive = "warning"
+reportWildcardImportFromLibrary = "none"
