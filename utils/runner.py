@@ -22,7 +22,7 @@ class Runner:
 
     @staticmethod
     def _actual_runner(func: Solution, /):
-        answer = func(get_data(year=2023))
+        answer = func(get_data())
         print(f"Result for {func.__name__}: {answer}")
 
     def __call__(self, func: Solution, /) -> Solution:
@@ -46,7 +46,7 @@ run = Runner()
 def submit(func: Solution, /) -> Solution:
     part = func.__name__[0]
 
-    answer = func(get_data(year=2023))
+    answer = func(get_data())
 
     _impartial_submit(
         answer,
