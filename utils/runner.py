@@ -6,7 +6,6 @@ import textwrap
 from typing import Any, Callable, TypeAlias
 
 from aocd import _impartial_submit, get_data
-from typing_extensions import Self
 
 from utils.core import Input
 
@@ -14,8 +13,6 @@ __all__ = (
     "runs",
     "submit",
     "test",
-    "cout",
-    "endl",
 )
 
 
@@ -61,47 +58,6 @@ log = logging.getLogger()
 log.setLevel(level)
 handler.setFormatter(_ColorFormatter())
 log.handlers = [handler]
-
-
-class _Endl:
-    __slots__ = ()
-
-    def __eq__(self, other) -> bool:
-        return False
-
-    def __bool__(self) -> bool:
-        return False
-
-    def __hash__(self) -> int:
-        return 0
-
-    def __repr__(self) -> str:
-        return "endl"
-
-
-endl = _Endl()
-
-
-class _Cout:
-    __slots__ = ("_buffer",)
-
-    def __init__(self):
-        self._buffer: list[Any] = []
-
-    def flush(self):
-        if self._buffer:
-            log.debug(" ".join(map(str, self._buffer)))
-            self._buffer.clear()
-
-    def __lshift__(self, msg: Any | _Endl, /) -> Self:
-        if msg is endl:
-            self.flush()
-        else:
-            self._buffer.append(msg)
-        return self
-
-
-cout = _Cout()
 
 
 # region: auto run and submit
