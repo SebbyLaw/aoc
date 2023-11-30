@@ -17,6 +17,12 @@ sys.setrecursionlimit(100000)
 __all__ = (
     "lmap",
     "lzip",
+    "ints",
+    "floats",
+    "positive_ints",
+    "positive_floats",
+    "words_alpha",
+    "words_alphanum",
     "Input",
     "Coord",
     "Grid",
@@ -49,6 +55,36 @@ def lzip(*iterables: Iterable[T]) -> list[tuple[T, ...]]:
 
 
 # region: input/parsing
+def ints(s: str, /) -> list[int]:
+    """Return a list of integers in the given string."""
+    return lmap(int, re.findall(r"(?:(?<!\d)-)?\d+", s))
+
+
+def floats(s: str, /) -> list[float]:
+    """Return a list of floats in the given string."""
+    return lmap(float, re.findall(r"-?\d+(?:\.\d+)?", s))
+
+
+def positive_ints(s: str, /) -> list[int]:
+    """Return a list of positive integers in the given string."""
+    return lmap(int, re.findall(r"\d+", s))
+
+
+def positive_floats(s: str, /) -> list[float]:
+    """Return a list of positive floats in the given string."""
+    return lmap(float, re.findall(r"\d+(?:\.\d+)?", s))
+
+
+def words_alpha(s: str, /) -> list[str]:
+    """Return a list of regex-matched words in the given string. Matches only alphabetic characters."""
+    return re.findall(r"[A-Za-z]+", s)
+
+
+def words_alphanum(s: str, /) -> list[str]:
+    """Return a list of regex-matched words in the given string. Matches alphanumeric characters and underscores."""
+    return re.findall(r"\w+", s)
+
+
 class Input:
     __slots__ = ("__raw",)
 
@@ -77,32 +113,32 @@ class Input:
     @property
     def words_alpha(self) -> list[str]:
         """Return a list of regex-matched words in the input. Matches only alphabetic characters."""
-        return re.findall(r"[A-Za-z]+", self.__raw)
+        return words_alpha(self.__raw)
 
     @property
     def words_alphanum(self) -> list[str]:
         """Return a list of regex-matched words in the input. Matches alphanumeric characters and underscores."""
-        return re.findall(r"\w+", self.__raw)
+        return words_alphanum(self.__raw)
 
     @property
     def ints(self) -> list[int]:
         """Return a list of regex-matched integers in the input."""
-        return lmap(int, re.findall(r"(?:(?<!\d)-)?\d+", self.__raw))
+        return ints(self.__raw)
 
     @property
     def floats(self) -> list[float]:
         """Return a list of regex-matched floats in the input."""
-        return lmap(float, re.findall(r"-?\d+(?:\.\d+)?", self.__raw))
+        return floats(self.__raw)
 
     @property
     def positive_ints(self) -> list[int]:
         """Return a list of regex-matched positive integers in the input."""
-        return lmap(int, re.findall(r"\d+", self.__raw))
+        return positive_ints(self.__raw)
 
     @property
     def positive_floats(self) -> list[float]:
         """Return a list of regex-matched positive floats in the input."""
-        return lmap(float, re.findall(r"\d+(?:\.\d+)?", self.__raw))
+        return positive_floats(self.__raw)
 
 
 # endregion
