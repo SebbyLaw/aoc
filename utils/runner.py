@@ -135,7 +135,7 @@ class runs:
     def __init__(self, *calls: DecoratesSolution):
         self.calls: list[DecoratesSolution] = [*calls]
 
-        if submit not in self.calls:
+        if not self.calls:
             self.calls.append(self.runner)
 
     @staticmethod
