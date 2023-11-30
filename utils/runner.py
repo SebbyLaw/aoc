@@ -12,7 +12,6 @@ from utils.core import Input
 
 __all__ = (
     "runs",
-    "get_input",
     "submit",
     "test",
     "cout",
