@@ -27,7 +27,7 @@ zoneight234
 
 
 @runs(
-    *tests,
+    tests[0],
     submit,
 )
 def a(inp: Input) -> Any:
@@ -57,19 +57,9 @@ def b(inp: Input) -> Any:
     }
     total = 0
     for line in inp.lines:
-        ns = re.findall(r"(\d|one|two|three|four|five|six|seven|eight|nine)", line)
+        ns = re.findall(r"(?=(\d|one|two|three|four|five|six|seven|eight|nine))", line)
         first = ns[0]
-
-        l2 = line[-1]
-        line = line[:-1]
-        while True:
-            ns = re.findall(r"(\d|one|two|three|four|five|six|seven|eight|nine)", l2)
-            if not ns:
-                l2 = line[-1] + l2
-                line = line[:-1]
-            else:
-                second = ns[-1]
-                break
+        second = ns[-1]
 
         try:
             first = nums[first]
