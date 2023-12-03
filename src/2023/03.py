@@ -22,10 +22,9 @@ tests = [
 ]
 
 
-def discover_num(grid: Grid, coord: Coord) -> tuple[Coord, ...]:
+def discover_num(grid: Grid, coord: Coord, /) -> tuple[Coord, ...]:
     """Return the number at the given coordinate"""
     # "bfs" to the left and right only
-    # print(coord)
     seen = set()
     nums = []
     queue = collections.deque([coord])
@@ -36,42 +35,31 @@ def discover_num(grid: Grid, coord: Coord) -> tuple[Coord, ...]:
         seen.add(coord)
         if grid[coord].isdigit():
             nums.append(coord)
-            for dr, dc in ((0, -1), (0, 1)):
-                adj = (coord[0] + dr, coord[1] + dc)
-                if adj in grid:
-                    if grid[adj] != "#":
-                        queue.append(adj)
+            for adj in grid.adj(coord, delta=[(-1, 0), (1, 0)]):
+                if grid[adj] != "#":
+                    queue.append(adj)
 
     nums.sort(key=lambda c: c[1])
     return tuple(nums)
 
 
 @runs(
-    # *tests,
-    # submit,
+    *tests,
+    submit,
 )
 def a(inp: Input) -> Any:
-    grid = Grid([list(line.strip()) for line in inp.lines])
-
+    grid = inp.into_grid()
     symbols = set(inp.raw) - set("0123456789.\n")
-    # print(symbols)
-
     nums: set[tuple[Coord, ...]] = set()
 
-    for row in range(grid.rows):
-        for col in range(grid.cols):
-            if grid[(row, col)] in symbols:
-                # find parts adjacent
-                for dr, dc in OCTO_DELTA:
-                    adj = (row + dr, col + dc)
-                    if adj in grid:
-                        if grid[adj].isdigit():
-                            nums.add(discover_num(grid, adj))
+    for coord in grid.coords():
+        if grid[coord] in symbols:
+            # find parts adjacent
+            for adj in grid.adj(coord, delta=OCTO_DELTA):
+                if grid[adj].isdigit():
+                    nums.add(discover_num(grid, adj))
 
-    total = 0
-    for num in nums:
-        total += int("".join(grid[c] for c in num))
-    return total
+    return sum(int("".join(grid[c] for c in num)) for num in nums)
 
 
 @runs(
@@ -79,26 +67,20 @@ def a(inp: Input) -> Any:
     submit,
 )
 def b(inp: Input) -> Any:
-    grid = Grid([list(line.strip()) for line in inp.lines])
-
+    grid = inp.into_grid()
     gear_ratios: list[int] = []
 
     # a gear is any symbol * that is adjacent to exactly two part numbers
+    for coord in grid.coords():
+        if grid[coord] == "*":
+            adjacent_nums: set[tuple[Coord, ...]] = set()
 
-    for row in range(grid.rows):
-        for col in range(grid.cols):
-            if grid[(row, col)] == "*":
-                adjacent_nums: set[tuple[Coord, ...]] = set()
+            for adj in grid.adj(coord, delta=OCTO_DELTA):
+                if grid[adj].isdigit():
+                    adjacent_nums.add(discover_num(grid, adj))
 
-                # find parts adjacent
-                for dr, dc in OCTO_DELTA:
-                    adj = (row + dr, col + dc)
-                    if adj in grid:
-                        if grid[adj].isdigit():
-                            adjacent_nums.add(discover_num(grid, adj))
-
-                if len(adjacent_nums) == 2:
-                    gear_ratio: int = math.prod(int("".join(grid[c] for c in num)) for num in adjacent_nums)
-                    gear_ratios.append(gear_ratio)
+            if len(adjacent_nums) == 2:
+                gear_ratio: int = math.prod(int("".join(grid[c] for c in num)) for num in adjacent_nums)
+                gear_ratios.append(gear_ratio)
 
     return sum(gear_ratios)

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import sys
-from typing import Callable, Generic, Iterable, TypeAlias, TypeVar
+from typing import Callable, Generic, Iterable, Iterator, Literal, Sequence, TypeAlias, TypeVar, overload
 
 
 T = TypeVar("T")
@@ -99,6 +99,9 @@ class Input:
 
     def __hash__(self) -> int:
         return hash(self.__raw)
+
+    def into_grid(self, t: Callable[[str], T] = str) -> Grid[T]:
+        return Grid([lmap(t, line.strip()) for line in self.lines])
 
     @property
     def raw(self) -> str:
@@ -217,6 +220,17 @@ class Grid(Generic[T]):
 
     def __getitem__(self, coords: Coord) -> T:
         return self.grid[coords[0]][coords[1]]
+
+    def __setitem__(self, coords: Coord, value: T):
+        self.grid[coords[0]][coords[1]] = value
+
+    def adj(self, coord: Coord, /, *, delta: Sequence[Coord] = GRID_DELTA) -> Iterator[Coord]:
+        """Return an iterator of all adjacent coordinates."""
+        orig_r, orig_c = coord
+        for dr, dc in delta:
+            adj = (orig_r + dr, orig_c + dc)
+            if adj in self:
+                yield adj
 
     def print(self, sep: str = "", end: str = "\n", /):
         for row in self.grid:
