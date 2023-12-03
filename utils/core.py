@@ -237,6 +237,10 @@ class Grid(Generic[T]):
             print(*row, sep=sep, end=end)
 
 
+# endregion
+
+# region: "vectors"
+
 NumberT: TypeAlias = int | float | complex
 Vec: TypeAlias = Iterable[NumberT]
 LVec: TypeAlias = list[NumberT]
