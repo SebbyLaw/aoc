@@ -155,7 +155,7 @@ class runs:
 
 
 def test(ex: str, /) -> DecoratesSolution:
-    inp = Input(textwrap.dedent(ex.strip()))
+    inp = Input(textwrap.dedent(ex.rstrip().lstrip("\n")))
 
     def _tester(func: Solution, log: RunnerLog, /) -> Solution:
         log.log_input(inp)

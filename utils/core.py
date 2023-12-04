@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import re
 import sys
-from typing import Callable, Generic, Iterable, Iterator, Sequence, TypeAlias, TypeVar
+from typing import Callable, Generic, Iterable, Iterator, Sequence, SupportsIndex, TypeAlias, TypeVar
+
+from .view import StringView
 
 
 T = TypeVar("T")
@@ -15,6 +17,8 @@ sys.setrecursionlimit(100000)
 
 
 __all__ = (
+    "DARK_PIXEL",
+    "LIT_PIXEL",
     "lmap",
     "lzip",
     "ints",
@@ -25,6 +29,9 @@ __all__ = (
     "words_alphanum",
     "Input",
     "Coord",
+    "manhattan_distance",
+    "chebyshev_distance",
+    "euclidean_distance",
     "Grid",
     "GRID_DELTA",
     "OCTO_DELTA",
@@ -34,16 +41,16 @@ __all__ = (
     "turn_left",
     "turn_right",
     "turn_180",
-    "NumberT",
-    "Vec",
-    "LVec",
-    "vadd",
-    "vneg",
-    "vsub",
-    "vmul",
-    "vdiv",
-    "vdot",
+    "norm",
 )
+
+
+# region: misc
+
+DARK_PIXEL: str = "\u2588"
+LIT_PIXEL: str = "\u2591"
+
+# endregion
 
 
 def lmap(func: Callable[[T], U], /, *iterables: Iterable[T]) -> list[U]:
@@ -89,7 +96,7 @@ class Input:
     __slots__ = ("__raw",)
 
     def __init__(self, raw: str, /):
-        self.__raw = raw.strip()
+        self.__raw = raw.rstrip().lstrip("\n")
 
     def __repr__(self) -> str:
         return self.__raw
@@ -102,6 +109,23 @@ class Input:
 
     def into_grid(self, t: Callable[[str], T] = str) -> Grid[T]:
         return Grid([lmap(t, line.strip()) for line in self.lines])
+
+    def split(self, sep: str | None = None, maxsplit: SupportsIndex = -1) -> list[Input]:
+        """
+        Return a list of the substrings in the string, using sep as the separator string.
+
+        sep
+            The separator used to split the string.
+
+            When set to None (the default value), will split on any whitespace character (including \n \r \t \f and spaces) and will discard empty strings from the result.
+        maxsplit
+            Maximum number of splits (starting from the left). -1 (the default value) means no limit.
+        """
+        return [Input(part) for part in self.__raw.split(sep, maxsplit)]
+
+    @property
+    def view(self) -> StringView:
+        return StringView(self.__raw)
 
     @property
     def raw(self) -> str:
@@ -149,6 +173,21 @@ class Input:
 # region: grid
 Coord: TypeAlias = tuple[int, int]
 """A coordinate in a 2D grid. Tuple of (row, col)."""
+
+
+def manhattan_distance(coord1: Coord, coord2: Coord, /) -> int:
+    """Return the Manhattan distance between two coordinates."""
+    return abs(coord1[0] - coord2[0]) + abs(coord1[1] - coord2[1])
+
+
+def chebyshev_distance(coord1: Coord, coord2: Coord, /) -> int:
+    """Return the Chebyshev distance between two coordinates."""
+    return max(abs(coord1[0] - coord2[0]), abs(coord1[1] - coord2[1]))
+
+
+def euclidean_distance(coord1: Coord, coord2: Coord, /) -> float:
+    """Return the Euclidean distance between two coordinates."""
+    return ((coord1[0] - coord2[0]) ** 2 + (coord1[1] - coord2[1]) ** 2) ** 0.5
 
 
 GRID_DELTA: list[Coord] = [(0, 1), (1, 0), (0, -1), (-1, 0)]
@@ -207,6 +246,14 @@ class Grid(Generic[T]):
         self.rows: int = len(grid)
         self.cols: int = len(grid[0])
 
+    def find(self, value: T, /) -> Coord:
+        """Return the coordinate of the first occurrence of the given value in the grid."""
+        for r, row in enumerate(self.grid):
+            for c, cell in enumerate(row):
+                if cell == value:
+                    return (r, c)
+        raise ValueError(f"{value} not found in grid")
+
     def coords(self) -> list[Coord]:
         """Return a list of all coordinates in the grid."""
         return [(r, c) for r in range(self.rows) for c in range(self.cols)]
@@ -232,6 +279,34 @@ class Grid(Generic[T]):
             if adj in self:
                 yield adj
 
+    def is_edge(self, coord: Coord, /) -> bool:
+        """Return whether the given coordinate is on the edge of the grid."""
+        return coord[0] in (0, self.rows - 1) or coord[1] in (0, self.cols - 1)
+
+    def to_left(self, coord: Coord, /) -> Iterator[Coord]:
+        """Return an iterator of all coordinates to the left of the given coordinate."""
+        orig_r, orig_c = coord
+        for dc in range(orig_c - 1, -1, -1):
+            yield (orig_r, dc)
+
+    def to_right(self, coord: Coord, /) -> Iterator[Coord]:
+        """Return an iterator of all coordinates to the right of the given coordinate."""
+        orig_r, orig_c = coord
+        for dc in range(orig_c + 1, self.cols):
+            yield (orig_r, dc)
+
+    def to_up(self, coord: Coord, /) -> Iterator[Coord]:
+        """Return an iterator of all coordinates above the given coordinate."""
+        orig_r, orig_c = coord
+        for dr in range(orig_r - 1, -1, -1):
+            yield (dr, orig_c)
+
+    def to_down(self, coord: Coord, /) -> Iterator[Coord]:
+        """Return an iterator of all coordinates below the given coordinate."""
+        orig_r, orig_c = coord
+        for dr in range(orig_r + 1, self.rows):
+            yield (dr, orig_c)
+
     def print(self, sep: str = "", end: str = "\n", /):
         for row in self.grid:
             print(*row, sep=sep, end=end)
@@ -241,33 +316,10 @@ class Grid(Generic[T]):
 
 # region: "vectors"
 
-NumberT: TypeAlias = int | float | complex
-Vec: TypeAlias = Iterable[NumberT]
-LVec: TypeAlias = list[NumberT]
 
-
-def vadd(*vecs) -> LVec:
-    return list(map(sum, zip(*vecs)))
-
-
-def vneg(vec: Vec, /) -> LVec:
-    return [-x for x in vec]
-
-
-def vsub(vec1: Vec, vec2: Vec, /) -> LVec:
-    return [x - y for x, y in zip(vec1, vec2)]
-
-
-def vmul(vec: Vec, scalar: NumberT, /) -> LVec:
-    return [x * scalar for x in vec]
-
-
-def vdiv(vec: Vec, scalar: NumberT, /) -> LVec:
-    return [x / scalar for x in vec]
-
-
-def vdot(vec1: Vec, vec2: Vec, /) -> NumberT:
-    return sum(x * y for x, y in zip(vec1, vec2))
+def norm(scalar: int | float, /) -> int:
+    """Return the norm of the given scalar."""
+    return int(scalar and scalar // abs(scalar))
 
 
 # endregion
