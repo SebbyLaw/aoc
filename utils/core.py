@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import sys
-from typing import Callable, Generic, Iterable, Iterator, Literal, Sequence, TypeAlias, TypeVar, overload
+from typing import Callable, Generic, Iterable, Iterator, Sequence, TypeAlias, TypeVar
 
 
 T = TypeVar("T")
