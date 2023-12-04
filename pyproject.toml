@@ -5,7 +5,7 @@ description = "Advent of Code"
 authors = ["Sebastian Law <sebnlaw@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 networkx = "^3.2.1"
 infinite-sets = "^1.0.2"
 sortedcontainers = "^2.4.0"
