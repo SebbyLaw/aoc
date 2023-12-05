@@ -126,6 +126,7 @@ def b(inp: Input) -> Any:
 
         return val
 
+    # start at the smallest possible seed location and keep going until we find one that maps to an input seed
     for lr in sorted(maps["humidity-to-location"], key=lambda r: r.start):
         for i in lr:
             sd = seedloc(i)
