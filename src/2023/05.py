@@ -50,85 +50,60 @@ humidity-to-location map:
 )
 def a(inp: Input) -> Any:
     chunks = inp.raw.split("\n\n")
-    seeds = ints(chunks.pop(0))
-    maps: dict[str, dict[range, range]] = {}
+    seeds: list[int] = ints(chunks[0])
+    maps: list[list[tuple[orange, int]]] = []
 
-    for chunk in chunks:
-        lines = chunk.splitlines()
-        name = lines.pop(0).split(" ")[0]
-        maps[name] = m = {}
-        for line in lines:
+    for chunk in chunks[1:]:
+        m = []
+        maps.append(m)
+        for line in chunk.splitlines()[1:]:
             dest, src, length = ints(line)
-            m[range(src, src + length)] = range(dest, dest + length)
+            m.append((orange(src, src + length), dest - src))
 
-    minloc = 126783432158674  # lol
-
-    for seed in seeds:
-        val = seed
-        for m in [
-            "seed-to-soil",
-            "soil-to-fertilizer",
-            "fertilizer-to-water",
-            "water-to-light",
-            "light-to-temperature",
-            "temperature-to-humidity",
-            "humidity-to-location",
-        ]:
-            for r in maps[m]:
-                if val in r:
-                    val = maps[m][r].start + (val - r.start)
+    def apply_maps(seed: int, /) -> int:
+        for m in maps:
+            for rng, dt in m:
+                if seed in rng:
+                    seed += dt
                     break
-        if val < minloc:
-            minloc = val
+        return seed
 
-    return minloc
+    return min(apply_maps(seed) for seed in seeds)
 
 
 @runs(
-    # *tests,
+    *tests,
     submit,
 )
 def b(inp: Input) -> Any:
     chunks = inp.raw.split("\n\n")
-    seeds = ints(chunks.pop(0))
+    seeds = [orange(a, a + b) for a, b in batched(ints(chunks[0]), 2)]
+    maps: list[list[tuple[orange, int]]] = []
 
-    seedranges = [range(a, a + b) for a, b in batched(seeds, 2)]
-    maps: dict[str, dict[range, range]] = {}
-
-    for chunk in chunks:
-        lines = chunk.splitlines()
-        name = lines.pop(0).split(" ")[0]
-        maps[name] = m = {}
-        for line in lines:
+    for chunk in chunks[1:]:
+        m = []
+        maps.append(m)
+        for line in chunk.splitlines()[1:]:
             dest, src, length = ints(line)
-            m[range(src, src + length)] = range(dest, dest + length)
+            m.append((orange(src, src + length), dest - src))
 
-    # reverse of each map
+    def apply_map(mapping: list[tuple[orange, int]], seeds: list[orange], /):
+        unmapped = seeds
+        new_ranges = []
+        for dst, dt in mapping:
+            new_unmapped = []
+            for rng in unmapped:
+                ist = rng & dst
+                if ist:
+                    new_ranges.append(orange(ist.start + dt, ist.stop + dt))
+                    new_unmapped.extend(rng - dst)
+                else:
+                    new_unmapped.append(rng)
+            unmapped = new_unmapped
+        return unmapped + new_ranges
+
+    applied = seeds
     for m in maps:
-        maps[m] = {v: k for k, v in maps[m].items()}
+        applied = apply_map(m, seeds)
 
-    # solution is slow, idc
-    def seedloc(seed: int, /) -> int:
-        val = seed
-        for m in [
-            "humidity-to-location",
-            "temperature-to-humidity",
-            "light-to-temperature",
-            "water-to-light",
-            "fertilizer-to-water",
-            "soil-to-fertilizer",
-            "seed-to-soil",
-        ]:
-            for r in maps[m]:
-                if val in r:
-                    val = maps[m][r].start + (val - r.start)
-                    break
-
-        return val
-
-    # start at the smallest possible seed location and keep going until we find one that maps to an input seed
-    for lr in sorted(maps["humidity-to-location"], key=lambda r: r.start):
-        for i in lr:
-            sd = seedloc(i)
-            if any(sd in r for r in seedranges):
-                return i
+    return min(s.start for s in applied)
