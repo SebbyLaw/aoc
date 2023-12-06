@@ -1,6 +1,9 @@
 """Core utilities for Advent of Code."""
 
 from __future__ import annotations
+from fractions import Fraction
+
+from math import sqrt
 
 import re
 import sys
@@ -30,6 +33,8 @@ __all__ = (
     "words_alphanum",
     "Input",
     "norm",
+    "NaN",
+    "quadratic",
 )
 
 
@@ -167,3 +172,11 @@ def norm(scalar: int | float, /) -> int:
 
 
 # endregion
+
+NaN = float("nan")
+
+
+def quadratic(a: int, b: int, c: int, /) -> tuple[Fraction, Fraction]:
+    """Return the roots of the given quadratic equation."""
+    d = Fraction(*sqrt(b**2 - 4 * a * c).as_integer_ratio())
+    return Fraction(-b + d, 2 * a), Fraction(-b - d, 2 * a)
