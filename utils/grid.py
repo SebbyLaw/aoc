@@ -1,5 +1,5 @@
 # region: grid
-from typing import Generic, Iterator, Sequence, TypeAlias, TypeVar
+from typing import Generic, Iterator, Sequence, TypeVar
 
 
 __all__ = (
@@ -21,7 +21,7 @@ __all__ = (
 T = TypeVar("T")
 
 
-Coord: TypeAlias = tuple[int, int]
+type Coord = tuple[int, int]
 """A coordinate in a 2D grid. Tuple of (row, col)."""
 
 

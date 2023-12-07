@@ -3,7 +3,7 @@ import logging
 
 from pathlib import Path
 import textwrap
-from typing import Any, Callable, TypeAlias
+from typing import Any, Callable
 
 from aocd import _impartial_submit, get_data
 
@@ -89,8 +89,8 @@ class RunnerLog:
             self.log.info("Result: %s", self.solution)
 
 
-Solution: TypeAlias = Callable[[Input], str | int]
-DecoratesSolution: TypeAlias = Callable[[Solution, RunnerLog], Solution]
+type Solution = Callable[[Input], str | int]
+type DecoratesSolution = Callable[[Solution, RunnerLog], Solution]
 
 
 @cache
