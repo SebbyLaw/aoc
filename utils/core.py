@@ -97,9 +97,6 @@ class Input:
     def __str__(self) -> str:
         return self.__raw
 
-    def __hash__(self) -> int:
-        return hash(self.__raw)
-
     def into_grid(self, t: Callable[[str], T] = str, cls: Type[Grid] = Grid) -> Grid[T]:
         return cls([lmap(t, line.strip()) for line in self.lines])
 
