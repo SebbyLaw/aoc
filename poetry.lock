@@ -23,13 +23,13 @@ nb = ["IPython", "jupyter-server"]
 
 [[package]]
 name = "aocd-example-parser"
-version = "2023.12.2"
+version = "2023.12.8"
 description = "Implementation of example parser plugins for advent-of-code-data"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "aocd_example_parser-2023.12.2-py3-none-any.whl", hash = "sha256:5768994681d5ed77ac51b315a4ea67b7d29ac47c4cf15b2c718449f7d8dc253b"},
-    {file = "aocd_example_parser-2023.12.2.tar.gz", hash = "sha256:e287532cfaa450fd8594d143e63eec45a49f9fd5584666cc23215a094c558ae5"},
+    {file = "aocd_example_parser-2023.12.8-py3-none-any.whl", hash = "sha256:9025cbac819a9c548f6259b2dc8b786b065182a41f329a553e2b40333dcf9486"},
+    {file = "aocd_example_parser-2023.12.8.tar.gz", hash = "sha256:518578f7ae2a3502a9657b9118c0f1d4d6c1a3a229fad4db8f6c523e8d7cf2cc"},
 ]
 
 [[package]]
@@ -171,13 +171,13 @@ typing = ["typing-extensions (>=4.8)"]
 
 [[package]]
 name = "identify"
-version = "2.5.32"
+version = "2.5.33"
 description = "File identification library for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "identify-2.5.32-py2.py3-none-any.whl", hash = "sha256:0b7656ef6cba81664b783352c73f8c24b39cf82f926f78f4550eda928e5e0545"},
-    {file = "identify-2.5.32.tar.gz", hash = "sha256:5d9979348ec1a21c768ae07e0a652924538e8bce67313a73cb0f681cf08ba407"},
+    {file = "identify-2.5.33-py2.py3-none-any.whl", hash = "sha256:d40ce5fcd762817627670da8a7d8d8e65f24342d14539c59488dc603bf662e34"},
+    {file = "identify-2.5.33.tar.gz", hash = "sha256:161558f9fe4559e1557e1bff323e8631f6a0e4837f7497767c1782832f16b62d"},
 ]
 
 [package.extras]
@@ -401,24 +401,24 @@ files = [
 
 [[package]]
 name = "pebble"
-version = "5.0.4"
+version = "5.0.5"
 description = "Threading and multiprocessing eye-candy."
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "Pebble-5.0.4-py3-none-any.whl", hash = "sha256:b594505a6bf79ecec834abb2eb218bfc98f08b9d4d7cc3b61883eaf0d3e4b881"},
-    {file = "Pebble-5.0.4.tar.gz", hash = "sha256:6f7adf2bded4414bdd3562d5f4d567bd94ff101e726aff878a66575bc99c122b"},
+    {file = "Pebble-5.0.5-py3-none-any.whl", hash = "sha256:18e2d33aa5f128e0c2a813fb314605628b8bd2007e5f626464b1cd13345ae89f"},
+    {file = "Pebble-5.0.5.tar.gz", hash = "sha256:3759c33256fa8d7bba044761f96225da411268cc4cf4a200f9e7b187763e16a5"},
 ]
 
 [[package]]
 name = "platformdirs"
-version = "4.0.0"
+version = "4.1.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "platformdirs-4.0.0-py3-none-any.whl", hash = "sha256:118c954d7e949b35437270383a3f2531e99dd93cf7ce4dc8340d3356d30f173b"},
-    {file = "platformdirs-4.0.0.tar.gz", hash = "sha256:cb633b2bcf10c51af60beb0ab06d2f1d69064b43abf4c185ca6b28865f3f9731"},
+    {file = "platformdirs-4.1.0-py3-none-any.whl", hash = "sha256:11c8f37bcca40db96d8144522d925583bdb7a31f7b0e37e3ed4318400a8e2380"},
+    {file = "platformdirs-4.1.0.tar.gz", hash = "sha256:906d548203468492d432bcb294d4bc2fff751bf84971fbb2c10918cc206ee420"},
 ]
 
 [package.extras]
@@ -486,13 +486,13 @@ files = [
 
 [[package]]
 name = "pyright"
-version = "1.1.338"
+version = "1.1.339"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.338-py3-none-any.whl", hash = "sha256:28231a3c81ec738b3e1b02489eea5b67fb425a9be0717a32b2e075984623b3ff"},
-    {file = "pyright-1.1.338.tar.gz", hash = "sha256:132aa74d2d58d4d27a5b922672b5b4d2be7f3931e7276a2b231d15af6e45daad"},
+    {file = "pyright-1.1.339-py3-none-any.whl", hash = "sha256:662f3df170fdeda76fd21b158ab20c518dad99c2f14b0a7f84c2bfd60d5a8d2a"},
+    {file = "pyright-1.1.339.tar.gz", hash = "sha256:581ce4e281575814380dd67a331e75c0ccdca31eb848005ee1ae46e7bfa8b4f9"},
 ]
 
 [package.dependencies]
