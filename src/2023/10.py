@@ -29,8 +29,7 @@ LJ...
 
 
 def bfs(grid: Grid[str], start: Coord, /) -> dict[Coord, int]:
-    dist = {}
-    dist[start] = 0
+    dist = {start: 0}
     seen = set()
     queue = deque([start])
 
@@ -152,8 +151,7 @@ def b(inp: Input) -> Any:
 
     egrid = Grid([list(line.strip()) for line in expanded.strip().splitlines()])
     seen: set[Coord] = set()
-    queue: deque[Coord] = deque()
-    queue.append((0, 0))
+    queue: deque[Coord] = deque([(0, 0)])
     while queue:
         coord = queue.popleft()
         if coord in seen:
