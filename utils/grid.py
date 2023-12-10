@@ -157,9 +157,9 @@ class Grid(Generic[T]):
         for dr in range(orig_r + 1, self.rows):
             yield (dr, orig_c)
 
-    def print(self, sep: str = "", end: str = "\n", /):
+    def print(self, sep: str = "", end: str = "\n", file=None):
         for row in self.grid:
-            print(*row, sep=sep, end=end)
+            print(*row, sep=sep, end=end, file=file)
 
 
 # endregion
