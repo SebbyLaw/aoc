@@ -3,6 +3,7 @@ import logging
 
 from pathlib import Path
 import textwrap
+import time
 from typing import Any, Callable
 
 from aocd import _impartial_submit, get_data
@@ -114,8 +115,11 @@ def submit(func: Solution, log: RunnerLog, /) -> Solution:
     day, year = get_day_and_year(func)
 
     inp = get_input(day, year)
+    start = time.perf_counter_ns()
     answer = func(inp)
+    end = time.perf_counter_ns()
     log.set_solution(answer)
+    log.log.info(f"Time: {(end - start) / 1e6:.3f}ms")
 
     # set ansii color to green for submitter
     print("                  \x1b[35m_impartial_submit(): \x1b[32m", end="")
