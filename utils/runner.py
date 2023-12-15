@@ -59,6 +59,8 @@ log.setLevel(level)
 handler.setFormatter(_ColorFormatter())
 log.handlers = [handler]
 
+logging.getLogger("aocd").setLevel(logging.INFO)
+
 
 # region: auto run and submit
 class RunnerLog:
