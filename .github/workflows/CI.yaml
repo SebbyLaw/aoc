@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - "src/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "utils/**"
+
+jobs:
+  build-and-test:
+    name: Build and test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - run: cargo check
+      - run: cargo test
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install --sync --all-extras --no-root --no-interaction
+
+      - uses: PyO3/maturin-action@v1
+        with:
+          manylinux: auto
+          command: develop --release --strip
+
+      - run: poetry run pre-commit run --color=always --all-files
+      - run: poetry run pytest

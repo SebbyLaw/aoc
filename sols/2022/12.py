@@ -28,7 +28,7 @@ def bfs(grid: Grid, start: str, dest: str) -> int:
     sc = grid.find(start)
 
     # bfs shortest path to "E"
-    q: deque[tuple[Coord, int]] = deque([(sc, 0)])
+    q: deque[tuple[Point, int]] = deque([(sc, 0)])
     seen = {sc}
     prev = {}
     while q:

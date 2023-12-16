@@ -1,13 +1,22 @@
-# region: grid
+from __future__ import annotations
+from aoclib import Point
 from typing import Generic, Iterator, Sequence, TypeVar
 
 
 __all__ = (
-    "Coord",
+    "Point",
     "manhattan_distance",
     "chebyshev_distance",
     "euclidean_distance",
     "Grid",
+    "DELTA_UP",
+    "DELTA_DOWN",
+    "DELTA_LEFT",
+    "DELTA_RIGHT",
+    "DELTA_NORTH",
+    "DELTA_SOUTH",
+    "DELTA_WEST",
+    "DELTA_EAST",
     "GRID_DELTA",
     "OCTO_DELTA",
     "CHAR_TO_DELTA",
@@ -21,145 +30,203 @@ __all__ = (
 T = TypeVar("T")
 
 
-type Coord = tuple[int, int]
-"""A coordinate in a 2D grid. Tuple of (row, col)."""
+def manhattan_distance(p1: Point, p2: Point, /) -> int:
+    """Return the Manhattan distance between two points."""
+    return abs(p1.row - p2.row) + abs(p1.col - p2.col)
 
 
-def manhattan_distance(coord1: Coord, coord2: Coord, /) -> int:
-    """Return the Manhattan distance between two coordinates."""
-    return abs(coord1[0] - coord2[0]) + abs(coord1[1] - coord2[1])
+def chebyshev_distance(p1: Point, p2: Point, /) -> int:
+    """Return the Chebyshev distance between two points."""
+    return max(abs(p1.row - p2.row), abs(p1.col - p2.col))
 
 
-def chebyshev_distance(coord1: Coord, coord2: Coord, /) -> int:
-    """Return the Chebyshev distance between two coordinates."""
-    return max(abs(coord1[0] - coord2[0]), abs(coord1[1] - coord2[1]))
+def euclidean_distance(p1: Point, p2: Point, /) -> float:
+    """Return the Euclidean distance between two points."""
+    return ((p1.row - p2.row) ** 2 + (p1.col - p2.col) ** 2) ** 0.5
 
 
-def euclidean_distance(coord1: Coord, coord2: Coord, /) -> float:
-    """Return the Euclidean distance between two coordinates."""
-    return ((coord1[0] - coord2[0]) ** 2 + (coord1[1] - coord2[1]) ** 2) ** 0.5
+DELTA_UP: Point = Point(-1, 0)
+DELTA_DOWN: Point = Point(1, 0)
+DELTA_LEFT: Point = Point(0, -1)
+DELTA_RIGHT: Point = Point(0, 1)
+DELTA_NORTH: Point = DELTA_UP
+DELTA_SOUTH: Point = DELTA_DOWN
+DELTA_WEST: Point = DELTA_LEFT
+DELTA_EAST: Point = DELTA_RIGHT
+
+DELTA_NW: Point = DELTA_NORTH + DELTA_WEST
+DELTA_NE: Point = DELTA_NORTH + DELTA_EAST
+DELTA_SW: Point = DELTA_SOUTH + DELTA_WEST
+DELTA_SE: Point = DELTA_SOUTH + DELTA_EAST
 
 
-GRID_DELTA: list[Coord] = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+GRID_DELTA: list[Point] = [DELTA_UP, DELTA_DOWN, DELTA_LEFT, DELTA_RIGHT]
 """The four cardinal directions in a 2D grid."""
-OCTO_DELTA: list[Coord] = [(1, 1), (-1, -1), (1, -1), (-1, 1)] + GRID_DELTA
+OCTO_DELTA: list[Point] = GRID_DELTA + [DELTA_NW, DELTA_NE, DELTA_SW, DELTA_SE]
 """The eight cardinal and ordinal directions in a 2D grid."""
-CHAR_TO_DELTA: dict[str, Coord] = {
-    "E": (0, 1),
-    "S": (1, 0),
-    "W": (0, -1),
-    "N": (-1, 0),
-    "U": (-1, 0),
-    "D": (1, 0),
-    "R": (0, 1),
-    "L": (0, -1),
+CHAR_TO_DELTA: dict[str, Point] = {
+    "E": DELTA_EAST,
+    "S": DELTA_SOUTH,
+    "W": DELTA_WEST,
+    "N": DELTA_NORTH,
+    "U": DELTA_UP,
+    "D": DELTA_DOWN,
+    "R": DELTA_RIGHT,
+    "L": DELTA_LEFT,
 }
 """Mapping of common characters to their corresponding delta in a 2D grid."""
-DELTA_TO_UDLR: dict[Coord, str] = {
-    (0, 1): "R",
-    (1, 0): "D",
-    (0, -1): "L",
-    (-1, 0): "U",
+DELTA_TO_UDLR: dict[Point, str] = {
+    DELTA_RIGHT: "R",
+    DELTA_DOWN: "D",
+    DELTA_LEFT: "L",
+    DELTA_UP: "U",
 }
 """Mapping of common deltas to their corresponding UDLR character in a 2D grid."""
-DELTA_TO_NESW: dict[Coord, str] = {
-    (0, 1): "E",
-    (1, 0): "S",
-    (0, -1): "W",
-    (-1, 0): "N",
+DELTA_TO_NESW: dict[Point, str] = {
+    DELTA_EAST: "E",
+    DELTA_SOUTH: "S",
+    DELTA_WEST: "W",
+    DELTA_NORTH: "N",
 }
 """Mapping of common deltas to their corresponding Cardinal character in a 2D grid."""
 
 
-def turn_left(delta: Coord, /) -> Coord:
+def turn_left(delta: Point, /) -> Point:
     """Return the delta after turning left."""
-    return (-delta[1], delta[0])
+    return Point(-delta.col, delta.row)
 
 
-def turn_right(delta: Coord, /) -> Coord:
+def turn_right(delta: Point, /) -> Point:
     """Return the delta after turning right."""
-    return (delta[1], -delta[0])
+    return Point(delta.col, -delta.row)
 
 
-def turn_180(delta: Coord, /) -> Coord:
+def turn_180(delta: Point, /) -> Point:
     """Return the delta after turning 180 degrees."""
-    return (-delta[0], -delta[1])
+    return Point(-delta.row, -delta.col)
 
 
 class Grid(Generic[T]):
     """A 2D grid of values."""
 
-    __slots__ = ("grid", "rows", "cols")
+    __slots__ = ("data", "points", "rows", "cols")
 
     def __init__(self, grid: list[list[T]]):
-        self.grid: list[list[T]] = grid
         self.rows: int = len(grid)
         self.cols: int = len(grid[0])
 
-    def find(self, value: T, /) -> Coord:
+        self.points: list[list[Point]] = []
+        self.data: dict[Point, T] = {}
+
+        for r, row in enumerate(grid):
+            self.points.append([])
+            for c, value in enumerate(row):
+                point = Point(r, c)
+                self.points[r].append(point)
+                self.data[point] = value
+
+    @property
+    def origin(self) -> Point:
+        """Return the 'origin' (top left) of the grid."""
+        return self.points[0][0]
+
+    @property
+    def center(self) -> Point:
+        """Return the 'center' of the grid."""
+        return self.points[self.rows // 2][self.cols // 2]
+
+    def find(self, value: T, /) -> Point:
         """Return the coordinate of the first occurrence of the given value in the grid."""
-        for r, row in enumerate(self.grid):
-            for c, cell in enumerate(row):
-                if cell == value:
-                    return (r, c)
+        for point in self.coords():
+            if self[point] == value:
+                return point
+
         raise ValueError(f"{value} not found in grid")
 
-    def coords(self) -> list[Coord]:
+    def coords(self) -> Iterator[Point]:
         """Return a list of all coordinates in the grid."""
-        return [(r, c) for r in range(self.rows) for c in range(self.cols)]
+        for row in self.points:
+            yield from row
 
-    def in_bounds(self, row: int, col: int) -> bool:
+    def items(self) -> Iterator[tuple[Point, T]]:
+        """Return an iterator of all coordinates and their corresponding values in the grid."""
+        for point in self.coords():
+            yield point, self[point]
+
+    def values(self) -> Iterator[T]:
+        """Return an iterator of all values in the grid."""
+        for point in self.coords():
+            yield self[point]
+
+    def in_bounds(self, row: int, col: int, /) -> bool:
         """Return whether the given coordinate is in bounds."""
         return 0 <= row < self.rows and 0 <= col < self.cols
 
-    def __contains__(self, coords: Coord) -> bool:
-        return self.in_bounds(*coords)
+    def __contains__(self, point: Point, /) -> bool:
+        return self.in_bounds(point.row, point.col)
 
-    def __getitem__(self, coords: Coord) -> T:
-        return self.grid[coords[0]][coords[1]]
+    def __getitem__(self, point: Point, /) -> T:
+        return self.data[point]
 
-    def __setitem__(self, coords: Coord, value: T):
-        self.grid[coords[0]][coords[1]] = value
+    def __setitem__(self, point: Point, value: T, /):
+        self.data[point] = value
 
-    def adj(self, coord: Coord, /, *, delta: Sequence[Coord] = GRID_DELTA) -> Iterator[Coord]:
+    def adj(self, point: Point, /, *, delta: Sequence[Point] = GRID_DELTA) -> Iterator[Point]:
         """Return an iterator of all adjacent coordinates."""
-        orig_r, orig_c = coord
-        for dr, dc in delta:
-            adj = (orig_r + dr, orig_c + dc)
+        for dt in delta:
+            adj = point + dt
             if adj in self:
                 yield adj
 
-    def is_edge(self, coord: Coord, /) -> bool:
+    def is_edge(self, coord: Point, /) -> bool:
         """Return whether the given coordinate is on the edge of the grid."""
-        return coord[0] in (0, self.rows - 1) or coord[1] in (0, self.cols - 1)
+        return coord.row in (0, self.rows - 1) or coord.col in (0, self.cols - 1)
 
-    def to_left(self, coord: Coord, /) -> Iterator[Coord]:
+    def is_corner(self, coord: Point, /) -> bool:
+        """Return whether the given coordinate is on the corner of the grid."""
+        return coord.row in (0, self.rows - 1) and coord.col in (0, self.cols - 1)
+
+    def top_edge(self) -> Iterator[Point]:
+        """Return an iterator of all coordinates on the top edge of the grid."""
+        yield from self.points[0]
+
+    def bottom_edge(self) -> Iterator[Point]:
+        """Return an iterator of all coordinates on the bottom edge of the grid."""
+        yield from self.points[-1]
+
+    def left_edge(self) -> Iterator[Point]:
+        """Return an iterator of all coordinates on the left edge of the grid."""
+        for row in self.points:
+            yield row[0]
+
+    def right_edge(self) -> Iterator[Point]:
+        """Return an iterator of all coordinates on the right edge of the grid."""
+        for row in self.points:
+            yield row[-1]
+
+    def to_left(self, point: Point, /) -> Iterator[Point]:
         """Return an iterator of all coordinates to the left of the given coordinate."""
-        orig_r, orig_c = coord
-        for dc in range(orig_c - 1, -1, -1):
-            yield (orig_r, dc)
+        for dc in range(point.col - 1, -1, -1):
+            yield self.points[point.row][dc]
 
-    def to_right(self, coord: Coord, /) -> Iterator[Coord]:
+    def to_right(self, point: Point, /) -> Iterator[Point]:
         """Return an iterator of all coordinates to the right of the given coordinate."""
-        orig_r, orig_c = coord
-        for dc in range(orig_c + 1, self.cols):
-            yield (orig_r, dc)
+        for dc in range(point.col + 1, self.cols):
+            yield self.points[point.row][dc]
 
-    def to_up(self, coord: Coord, /) -> Iterator[Coord]:
+    def to_up(self, point: Point, /) -> Iterator[Point]:
         """Return an iterator of all coordinates above the given coordinate."""
-        orig_r, orig_c = coord
-        for dr in range(orig_r - 1, -1, -1):
-            yield (dr, orig_c)
+        for dr in range(point.row - 1, -1, -1):
+            yield self.points[dr][point.col]
 
-    def to_down(self, coord: Coord, /) -> Iterator[Coord]:
+    def to_down(self, point: Point, /) -> Iterator[Point]:
         """Return an iterator of all coordinates below the given coordinate."""
-        orig_r, orig_c = coord
-        for dr in range(orig_r + 1, self.rows):
-            yield (dr, orig_c)
+        for dr in range(point.row + 1, self.rows):
+            yield self.points[dr][point.col]
 
     def print(self, sep: str = "", end: str = "\n", file=None):
-        for row in self.grid:
-            print(*row, sep=sep, end=end, file=file)
+        for row in self.points:
+            print(*(self.data[r] for r in row), sep=sep, end=end, file=file)
 
-
-# endregion
+    def __str__(self) -> str:
+        return "\n".join("".join(str(self.data[r]) for r in row) for row in self.points)

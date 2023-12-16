@@ -25,7 +25,7 @@ def a(inp: Input) -> Any:
 
     visible = 0
 
-    def is_visible(tree: Coord, trees: Iterable[Coord], /) -> bool:
+    def is_visible(tree: Point, trees: Iterable[Point], /) -> bool:
         return all(grid[tree] > grid[other] for other in trees)
 
     for tree in grid.coords():
@@ -51,7 +51,7 @@ def a(inp: Input) -> Any:
 def b(inp: Input) -> Any:
     grid = inp.into_grid(int)
 
-    def viewable(cmp: int, trees: Iterable[Coord], /) -> int:
+    def viewable(cmp: int, trees: Iterable[Point], /) -> int:
         total = 0
         for tree in trees:
             total += 1
@@ -59,7 +59,7 @@ def b(inp: Input) -> Any:
                 break
         return total
 
-    def score(tree: Coord) -> int:
+    def score(tree: Point) -> int:
         if grid.is_edge(tree):
             return 0
 

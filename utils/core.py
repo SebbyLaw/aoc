@@ -13,6 +13,8 @@ from typing import Callable, Iterable, SupportsIndex, Type, TypeVar
 from .grid import Grid
 from .view import StringView
 
+from aoclib import orange
+
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -23,6 +25,7 @@ gc.disable()
 
 
 __all__ = (
+    "orange",
     "DARK_PIXEL",
     "LIT_PIXEL",
     "lmap",

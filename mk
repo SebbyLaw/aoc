@@ -21,10 +21,10 @@ fi
 
 set -e
 
-COPYING_TO=src/$1/$(printf "%02d" $2).py
+COPYING_TO=sols/$1/$(printf "%02d" $2).py
 
 echo "Creating $COPYING_TO"
-mkdir -p src/$1
+mkdir -p sols/$1
 
 cp -i template.py $COPYING_TO
 code $COPYING_TO

@@ -28,52 +28,49 @@ LJ...
 # S is the starting position of the animal; there is a pipe on this tile, but your sketch doesn't show what shape the pipe has.
 
 
-def bfs(grid: Grid[str], start: Coord, /) -> dict[Coord, int]:
+def bfs(grid: Grid[str], start: Point, /) -> dict[Point, int]:
     dist = {start: 0}
     seen = set()
     queue = deque([start])
 
     while queue:
-        coord = queue.popleft()
-        seen.add(coord)
+        point = queue.popleft()
+        seen.add(point)
 
-        match grid[coord]:
+        match grid[point]:
             case "S":
-                deltas = ""
-                up = (coord[0] - 1, coord[1])
-                down = (coord[0] + 1, coord[1])
-                left = (coord[0], coord[1] - 1)
-                right = (coord[0], coord[1] + 1)
+                up, left, right, down = point.up, point.left, point.right, point.down
+                deltas = []
                 if up in grid and grid[up] in "|7F":
-                    deltas += "U"
+                    deltas.append(DELTA_UP)
                 if down in grid and grid[down] in "|LJ":
-                    deltas += "D"
+                    deltas.append(DELTA_DOWN)
                 if left in grid and grid[left] in "-LF":
-                    deltas += "L"
+                    deltas.append(DELTA_LEFT)
                 if right in grid and grid[right] in "-J7":
-                    deltas += "R"
+                    deltas.append(DELTA_RIGHT)
             case "|":
-                deltas = "UD"
+                deltas = [DELTA_UP, DELTA_DOWN]
             case "-":
-                deltas = "LR"
+                deltas = [DELTA_LEFT, DELTA_RIGHT]
             case "L":
-                deltas = "UR"
+                deltas = [DELTA_UP, DELTA_RIGHT]
             case "J":
-                deltas = "UL"
+                deltas = [DELTA_UP, DELTA_LEFT]
             case "7":
-                deltas = "DL"
+                deltas = [DELTA_DOWN, DELTA_LEFT]
             case "F":
-                deltas = "DR"
+                deltas = [DELTA_DOWN, DELTA_RIGHT]
             case ".":
                 continue
             case _:
                 assert False, "What"
 
-        for adj in grid.adj(coord, delta=[CHAR_TO_DELTA[d] for d in deltas]):
+        for adj in grid.adj(point, delta=deltas):
             if grid[adj] == ".":
                 continue
             if adj not in seen:
-                dist[adj] = dist[coord] + 1
+                dist[adj] = dist[point] + 1
                 queue.append(adj)
 
     return dist
@@ -131,7 +128,7 @@ def b(inp: Input) -> Any:
             grid[coord] = "."
 
     # make it a string
-    raw = "\n".join("".join(row) for row in g)
+    raw = str(grid)
 
     # thanks oliver
     expand = {
@@ -150,8 +147,8 @@ def b(inp: Input) -> Any:
             expanded += "".join(expand[c][i] for c in line) + "\n"
 
     egrid = Grid([list(line.strip()) for line in expanded.strip().splitlines()])
-    seen: set[Coord] = set()
-    queue: deque[Coord] = deque([(0, 0)])
+    seen: set[Point] = set()
+    queue: deque[Point] = deque([grid.origin])
     while queue:
         coord = queue.popleft()
         if coord in seen:
@@ -165,7 +162,7 @@ def b(inp: Input) -> Any:
 
     total = 0
     for cr in egrid.coords():
-        if cr[0] % 3 != 1 or cr[1] % 3 != 1:
+        if cr.row % 3 != 1 or cr.col % 3 != 1:
             continue
         if egrid[cr] == "#":
             continue

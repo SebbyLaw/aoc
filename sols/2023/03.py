@@ -2,6 +2,7 @@ import collections
 import math
 from typing import Any
 from utils import *
+from utils.grid import DELTA_LEFT, DELTA_RIGHT
 
 
 tests = [
@@ -22,7 +23,7 @@ tests = [
 ]
 
 
-def discover_num(grid: Grid, coord: Coord, /) -> tuple[Coord, ...]:
+def discover_num(grid: Grid, coord: Point, /) -> tuple[Point, ...]:
     """Return the number at the given coordinate"""
     # "bfs" to the left and right only
     seen = set()
@@ -35,11 +36,11 @@ def discover_num(grid: Grid, coord: Coord, /) -> tuple[Coord, ...]:
         seen.add(coord)
         if grid[coord].isdigit():
             nums.append(coord)
-            for adj in grid.adj(coord, delta=[(-1, 0), (1, 0)]):
+            for adj in grid.adj(coord, delta=[DELTA_LEFT, DELTA_RIGHT]):
                 if grid[adj] != "#":
                     queue.append(adj)
 
-    nums.sort(key=lambda c: c[1])
+    nums.sort(key=lambda c: c.col)
     return tuple(nums)
 
 
@@ -50,7 +51,7 @@ def discover_num(grid: Grid, coord: Coord, /) -> tuple[Coord, ...]:
 def a(inp: Input) -> Any:
     grid = inp.into_grid()
     symbols = set(inp.raw) - set("0123456789.\n")
-    nums: set[tuple[Coord, ...]] = set()
+    nums: set[tuple[Point, ...]] = set()
 
     for coord in grid.coords():
         if grid[coord] in symbols:
@@ -73,7 +74,7 @@ def b(inp: Input) -> Any:
     # a gear is any symbol * that is adjacent to exactly two part numbers
     for coord in grid.coords():
         if grid[coord] == "*":
-            adjacent_nums: set[tuple[Coord, ...]] = set()
+            adjacent_nums: set[tuple[Point, ...]] = set()
 
             for adj in grid.adj(coord, delta=OCTO_DELTA):
                 if grid[adj].isdigit():

@@ -43,7 +43,7 @@ def a(inp: Input) -> Any:
     total = 0
     for c in grid.coords():
         if grid[c] == "O":
-            total += grid.cols - c[0]
+            total += grid.cols - c.row
 
     return total
 
