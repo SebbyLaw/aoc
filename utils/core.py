@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 from fractions import Fraction
+import gc
 
 from math import sqrt
 
@@ -18,6 +19,7 @@ U = TypeVar("U")
 
 # :tf:
 sys.setrecursionlimit(100000)
+gc.disable()
 
 
 __all__ = (
@@ -97,7 +99,7 @@ class Input:
     def __str__(self) -> str:
         return self.__raw
 
-    def into_grid(self, t: Callable[[str], T] = str, cls: Type[Grid] = Grid) -> Grid[T]:
+    def into_grid(self, t: Callable[[str], T] = sys.intern, cls: Type[Grid] = Grid) -> Grid[T]:
         return cls([lmap(t, line.strip()) for line in self.lines])
 
     def split(self, sep: str | None = None, maxsplit: SupportsIndex = -1) -> list[Input]:
