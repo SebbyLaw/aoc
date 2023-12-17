@@ -135,6 +135,11 @@ class Grid(Generic[T]):
         """Return the 'center' of the grid."""
         return self.points[self.rows // 2][self.cols // 2]
 
+    @property
+    def bottom_right(self) -> Point:
+        """Return the 'bottom right' of the grid."""
+        return self.points[self.rows - 1][self.cols - 1]
+
     def find(self, value: T, /) -> Point:
         """Return the coordinate of the first occurrence of the given value in the grid."""
         for point in self.coords():

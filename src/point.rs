@@ -2,9 +2,9 @@ use pyo3::prelude::*;
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::ops::{Add, Sub};
+use std::ops::{Add, Mul, Sub};
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 #[pyclass(module = "aoclib", frozen, get_all)]
 pub struct Point {
     row: i64,
@@ -29,6 +29,17 @@ impl Sub for Point {
         Point {
             row: self.row - other.row,
             col: self.col - other.col,
+        }
+    }
+}
+
+impl Mul<i64> for Point {
+    type Output = Self;
+
+    fn mul(self, scalar: i64) -> Self {
+        Point {
+            row: self.row * scalar,
+            col: self.col * scalar,
         }
     }
 }
@@ -65,6 +76,18 @@ impl Point {
 
     fn __sub__(&self, other: &Self) -> Self {
         self.sub(*other)
+    }
+
+    fn __mul__(&self, scalar: i64) -> Self {
+        *self * scalar
+    }
+
+    fn __lt__(&self, other: &Self) -> bool {
+        self < other
+    }
+
+    fn __le__(&self, other: &Self) -> bool {
+        self <= other
     }
 
     #[getter]
@@ -157,5 +180,13 @@ mod tests {
         let p2 = Point::new(3, 4);
         let p3 = p1 - p2;
         assert_eq!(p3, Point::new(-2, -2));
+    }
+
+    #[test]
+    fn test_point_mul() {
+        let p1 = Point::new(1, 2);
+        let p3 = p1 * 3;
+        assert_eq!(p3, Point::new(3, 6));
+        assert_eq!(p1, Point::new(1, 2));
     }
 }
