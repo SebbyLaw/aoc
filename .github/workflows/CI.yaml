@@ -41,11 +41,7 @@ jobs:
       - name: Install dependencies
         run: poetry install --sync --all-extras --no-root --no-interaction
 
-      - uses: PyO3/maturin-action@v1
-        with:
-          manylinux: auto
-          command: develop
-          args: --release --strip --features extension-module -i python3.12
+      - run: maturin develop --release --strip --features extension-module
 
       - run: poetry run pre-commit run --color=always --all-files
       - run: poetry run pytest
