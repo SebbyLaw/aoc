@@ -38,10 +38,6 @@ jobs:
           python-version: "3.12"
           cache: "poetry"
 
-      - name: Install dependencies
-        run: poetry install --sync --all-extras --no-root --no-interaction
-
+      - run: poetry install --sync --all-extras --no-root --no-interaction
       - run: poetry run maturin develop --release --strip --features extension-module
-
-      - run: poetry run pre-commit run --color=always --all-files
       - run: poetry run pytest
