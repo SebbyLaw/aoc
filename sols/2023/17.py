@@ -43,7 +43,7 @@ class State(NamedTuple):
 def search(grid: Grid[int], mindist: int, maxdist: int, /) -> int:
     start = grid.origin
     goal = grid.bottom_right
-    queue: list[State] = [State(0, start, DELTA_UP)]
+    queue: list[State] = [State(0, start, DELTA_DOWN), State(0, start, DELTA_RIGHT)]
     seen: set[tuple[Point, Point]] = set()
     costs: dict[tuple[Point, Point], int] = {}
 
@@ -57,6 +57,7 @@ def search(grid: Grid[int], mindist: int, maxdist: int, /) -> int:
         if k in seen:
             continue
         seen.add(k)
+
         for delta in (turn_left(direction), turn_right(direction)):
             incr: int = 0
             for roll in range(1, maxdist + 1):
