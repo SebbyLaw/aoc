@@ -36,9 +36,8 @@ def a(inp: Input) -> Any:
         d, n, *_ = line.split()
         direction = CHAR_TO_DELTA[d]
         dist = int(n)
-        for _ in range(dist):
-            x += direction.col
-            y += direction.row
+        x += direction.col * dist
+        y += direction.row * dist
         corners.append((x, y))
 
     shape = shapely.Polygon(corners)
@@ -64,9 +63,8 @@ def b(inp: Input) -> Any:
     for line in inp.lines:
         *_, code = line.split()
         direction, dist = convert(code)
-        for _ in range(dist):
-            x += direction.col
-            y += direction.row
+        x += direction.col * dist
+        y += direction.row * dist
         corners.append((x, y))
 
     shape = shapely.Polygon(corners)
