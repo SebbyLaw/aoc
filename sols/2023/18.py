@@ -34,10 +34,9 @@ def a(inp: Input) -> Any:
     corners: list[tuple[int, int]] = [(0, 0)]
     for line in inp.lines:
         d, n, *_ = line.split()
-        direction = CHAR_TO_DELTA[d]
-        dist = int(n)
-        x += direction.col * dist
-        y += direction.row * dist
+        delta = CHAR_TO_DELTA[d] * int(n)
+        x += delta.col
+        y += delta.row
         corners.append((x, y))
 
     shape = shapely.Polygon(corners)
@@ -52,19 +51,19 @@ def b(inp: Input) -> Any:
     x = y = 0
     dct = [DELTA_RIGHT, DELTA_DOWN, DELTA_LEFT, DELTA_UP]
 
-    def convert(code: str, /) -> tuple[Point, int]:
+    def convert(code: str, /) -> Point:
         # (#70c710)
         n = int(code[-2])
         code = code[2:-2]
         dist = int(code, 16)
-        return dct[n], dist
+        return dct[n] * dist
 
     corners: list[tuple[int, int]] = [(0, 0)]
     for line in inp.lines:
         *_, code = line.split()
-        direction, dist = convert(code)
-        x += direction.col * dist
-        y += direction.row * dist
+        delta = convert(code)
+        x += delta.col
+        y += delta.row
         corners.append((x, y))
 
     shape = shapely.Polygon(corners)
