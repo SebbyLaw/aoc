@@ -44,9 +44,17 @@ class Part:
 
 
 @dataclass(slots=True, frozen=True)
+class Condition:
+    attr: str
+    op: Literal[">", "<"]
+    val: int
+    res: Literal["A", "R"] | str
+
+
+@dataclass(slots=True, frozen=True)
 class Workflow:
     name: str
-    conditions: list["Condition"]
+    conditions: list[Condition]
     default: Literal["A", "R"] | str
 
     def check(self, part: Part, /) -> str:
@@ -55,14 +63,6 @@ class Workflow:
                 return c.res
         else:
             return self.default
-
-
-@dataclass(slots=True, frozen=True)
-class Condition:
-    attr: str
-    op: Literal[">", "<"]
-    val: int
-    res: Literal["A", "R"] | str
 
 
 def make_workflows(inp: Input, /) -> dict[str, Workflow]:
