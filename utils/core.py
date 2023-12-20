@@ -102,6 +102,13 @@ class Input:
     def __str__(self) -> str:
         return self.__raw
 
+    def __int__(self) -> int:
+        return int(self.__raw)
+
+    @property
+    def int(self) -> int:
+        return int(self.__raw)
+
     def into_grid(self, t: Callable[[str], T] = sys.intern, cls: Type[Grid] = Grid) -> Grid[T]:
         return cls([lmap(t, line.strip()) for line in self.lines])
 
