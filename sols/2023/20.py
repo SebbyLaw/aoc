@@ -45,9 +45,6 @@ class Module:
     def pulse(self, Q: deque[tuple[str, Pulse]], v: Pulse, /) -> None:
         ...
 
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.name!r}, {self.destinations=})"
-
 
 class FlipFlop(Module):
     __slots__ = ("on",)
@@ -62,9 +59,6 @@ class FlipFlop(Module):
             p = HIGH if self.on else LOW
             for dest in self.destinations:
                 Q.append((dest, (self.name, p)))
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.name!r}, {self.on=}, {self.destinations=})"
 
 
 class Conjunction(Module):
@@ -87,8 +81,52 @@ class Conjunction(Module):
         for dest in self.destinations:
             Q.append((dest, (self.name, p)))
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}({self.name!r}, {self.last_recv=}, {self.destinations=})"
+
+def construct(inp: Input, /) -> tuple[dict[str, Module], str]:
+    mods: dict[str, Module] = {}
+
+    for line in inp.lines:
+        lhs, rhs = line.split(" -> ")
+        name = intern(lhs[1:].strip())
+        destinations = tuple(intern(s) for s in rhs.split(", "))
+        if line.startswith("%"):
+            mods[name] = FlipFlop(name, destinations)
+        elif line.startswith("&"):
+            mods[name] = Conjunction(name, destinations)
+        else:
+            # broadcaster
+            mods["broadcaster"] = Broadcaster("broadcaster", destinations)
+
+    for line in inp.lines:
+        lhs, rhs = line.split(" -> ")
+        name = intern(lhs[1:].strip())
+        destinations = tuple(intern(s) for s in rhs.split(", "))
+        if line.startswith("%"):
+            mods[name] = FlipFlop(name, destinations)
+        elif line.startswith("&"):
+            mods[name] = Conjunction(name, destinations)
+        else:
+            # broadcaster
+            mods["broadcaster"] = Broadcaster("broadcaster", destinations)
+
+    rx_parent: str = ""
+    to_add: set[str] = set()
+    for mname, mod in mods.items():
+        for dst in mod.destinations:
+            try:
+                dest = mods[dst]
+            except KeyError:
+                to_add.add(dst)
+                if dst == "rx":
+                    rx_parent = mname
+            else:
+                if isinstance(dest, Conjunction):
+                    dest.last_recv[mname] = LOW
+
+    for name in to_add:
+        mods[name] = Module(name, ())
+
+    return mods, rx_parent
 
 
 class Broadcaster(Module):
@@ -102,96 +140,39 @@ class Broadcaster(Module):
     submit,
 )
 def a(inp: Input) -> Any:
-    mods: dict[str, Module] = {}
+    mods, _ = construct(inp)
 
-    for line in inp.lines:
-        lhs, rhs = line.split(" -> ")
-        name = intern(lhs[1:].strip())
-        destinations = tuple(intern(s) for s in rhs.split(", "))
-        if line.startswith("%"):
-            mods[name] = FlipFlop(name, destinations)
-        elif line.startswith("&"):
-            mods[name] = Conjunction(name, destinations)
-        else:
-            # broadcaster
-            mods["broadcaster"] = Broadcaster("broadcaster", destinations)
-
-    to_add: set[str] = set()
-    for mname, mod in mods.items():
-        for dst in mod.destinations:
-            try:
-                dest = mods[dst]
-            except KeyError:
-                to_add.add(dst)
-            else:
-                if isinstance(dest, Conjunction):
-                    dest.last_recv[mname] = LOW
-
-    for name in to_add:
-        mods[name] = Module(name, ())
-
-    lowp = 0
-    highp = 0
-
-    bc = mods["broadcaster"]
+    total = [0, 0]
     q = deque()
     for _ in range(1000):
-        bc.pulse(q, ("button", LOW))
-        lowp += 1
+        q.append(("broadcaster", ("button", LOW)))
         while q:
             name, p = q.popleft()
             mods[name].pulse(q, p)
-            if p[1] is LOW:
-                lowp += 1
-            else:
-                highp += 1
+            total[p[1]] += 1
 
-    return lowp * highp
+    return math.prod(total)
 
 
 @runs(
-    # tests will never finish
-    # *tests,
+    *tests,
     submit,
 )
 def b(inp: Input) -> Any:
-    mods: dict[str, Module] = {}
+    mods, rx_parent = construct(inp)
 
-    for line in inp.lines:
-        lhs, rhs = line.split(" -> ")
-        name = intern(lhs[1:].strip())
-        destinations = tuple(intern(s) for s in rhs.split(", "))
-        if line.startswith("%"):
-            mods[name] = FlipFlop(name, destinations)
-        elif line.startswith("&"):
-            mods[name] = Conjunction(name, destinations)
-        else:
-            # broadcaster
-            mods["broadcaster"] = Broadcaster("broadcaster", destinations)
+    if not rx_parent:
+        print("no rx parent")
+        return -1
 
-    to_add: set[str] = set()
-    for mname, mod in mods.items():
-        for dst in mod.destinations:
-            try:
-                dest = mods[dst]
-            except KeyError:
-                to_add.add(dst)
-            else:
-                if isinstance(dest, Conjunction):
-                    dest.last_recv[mname] = LOW
-
-    for name in to_add:
-        mods[name] = Module(name, ())
-
-    bc = mods["broadcaster"]
     q: deque[tuple[str, Pulse]] = deque()
     rxgpvals = []
     for step in count(1):
-        bc.pulse(q, ("button", LOW))
+        q.append(("broadcaster", ("button", LOW)))
         while q:
             name, p = q.popleft()
             mods[name].pulse(q, p)
-            if name == "zh" and p[1] is HIGH:
+            if name == rx_parent and p[1] is HIGH:
                 rxgpvals.append(step)
                 print(p[0], step)
                 if len(rxgpvals) == 4:
