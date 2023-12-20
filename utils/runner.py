@@ -79,6 +79,7 @@ class RunnerLog:
     def log_input(self, inp: Input, /) -> None:
         self.log.info("====================")
         self.log.info(f"{self.name.title()} input:\n\x1b[0;34m{inp}")
+        self.log.info("====================")
 
     def __enter__(self):
         self.log.info("====================")
@@ -165,8 +166,11 @@ def test(ex: str, /) -> DecoratesSolution:
 
     def _tester(func: Solution, log: RunnerLog, /) -> Solution:
         log.log_input(inp)
+        start = time.perf_counter_ns()
         answer = func(inp)
+        end = time.perf_counter_ns()
         log.set_solution(answer)
+        log.log.info(f"Time: {(end - start) / 1e6:.3f}ms")
 
         return func
 
