@@ -125,10 +125,25 @@ class Grid(Generic[T]):
                 self.points[r].append(point)
                 self.data[point] = value
 
+    @classmethod
+    def of(cls, value: T, cols: int, rows: int, /) -> Grid[T]:
+        """Return a grid of the given size filled with the given value.
+
+        value: value to fill the grid with
+        cols: number of columns (width or x-axis)
+        rows: number of rows (height or y-axis)
+        """
+        return cls([[value] * cols for _ in range(rows)])
+
     @property
     def origin(self) -> Point:
         """Return the 'origin' (top left) of the grid."""
         return self.points[0][0]
+
+    @property
+    def bottom_left(self) -> Point:
+        """Return the 'bottom left' of the grid."""
+        return self.points[self.rows - 1][0]
 
     @property
     def center(self) -> Point:
@@ -139,6 +154,16 @@ class Grid(Generic[T]):
     def bottom_right(self) -> Point:
         """Return the 'bottom right' of the grid."""
         return self.points[self.rows - 1][self.cols - 1]
+
+    @property
+    def top_right(self) -> Point:
+        """Return the 'top right' of the grid."""
+        return self.points[0][self.cols - 1]
+
+    @property
+    def corners(self) -> tuple[Point, Point, Point, Point]:
+        """Return the four corners of the grid."""
+        return self.origin, self.top_right, self.bottom_right, self.bottom_left
 
     def find(self, value: T, /) -> Point:
         """Return the coordinate of the first occurrence of the given value in the grid."""
@@ -175,6 +200,14 @@ class Grid(Generic[T]):
 
     def __setitem__(self, point: Point, value: T, /):
         self.data[point] = value
+
+    def count(self, value: T, /) -> int:
+        """Return the number of times the given value appears in the grid."""
+        return sum(1 for v in self.data.values() if v == value)
+
+    def set(self, row: int, col: int, value: T, /):
+        """Set the value at the given coordinate."""
+        self.data[self.points[row][col]] = value
 
     def adj(self, point: Point, /, *, delta: Sequence[Point] = GRID_DELTA) -> Iterator[Point]:
         """Return an iterator of all adjacent coordinates."""
@@ -235,3 +268,14 @@ class Grid(Generic[T]):
 
     def __str__(self) -> str:
         return "\n".join("".join(str(self.data[r]) for r in row) for row in self.points)
+
+    def copy(self) -> Grid[T]:
+        """Return a shallow copy of the grid."""
+        grid = Grid([[]])
+        grid.rows = self.rows
+        grid.cols = self.cols
+        # we can save a lot of time by not creating new Points
+        # since points is supposed to be immutable, don't even bother copying it
+        grid.points = self.points
+        grid.data = self.data.copy()
+        return grid
