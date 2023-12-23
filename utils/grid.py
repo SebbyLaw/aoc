@@ -209,12 +209,18 @@ class Grid(Generic[T]):
         """Set the value at the given coordinate."""
         self.data[self.points[row][col]] = value
 
-    def adj(self, point: Point, /, *, delta: Sequence[Point] = GRID_DELTA) -> Iterator[Point]:
+    def wrap(self, point: Point, /) -> Point:
+        """Return the wrapped coordinate of the given coordinate."""
+        return self.points[point.row % self.rows][point.col % self.cols]
+
+    def adj(self, point: Point, /, *, delta: Sequence[Point] = GRID_DELTA, wraps: bool = False) -> Iterator[Point]:
         """Return an iterator of all adjacent coordinates."""
         for dt in delta:
             adj = point + dt
             if adj in self:
                 yield adj
+            elif wraps:
+                yield self.wrap(adj)
 
     def is_edge(self, coord: Point, /) -> bool:
         """Return whether the given coordinate is on the edge of the grid."""
