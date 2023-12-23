@@ -59,28 +59,24 @@ def a(inp: Input) -> Any:
                 for adj in grid.adj(curr):
                     if grid[adj] in ".^v<>" and adj not in path:
                         heapq.heappush(q, (dist - 1, adj, path | {curr}))
+                continue
             case "^":
                 # must go up
                 adj = curr.up
-                if grid[adj] == "." and adj not in path:
-                    heapq.heappush(q, (dist - 1, adj, path | {curr}))
             case "v":
                 # must go down
                 adj = curr.down
-                if grid[adj] == "." and adj not in path:
-                    heapq.heappush(q, (dist - 1, adj, path | {curr}))
             case "<":
                 # must go left
                 adj = curr.left
-                if grid[adj] == "." and adj not in path:
-                    heapq.heappush(q, (dist - 1, adj, path | {curr}))
             case ">":
                 # must go right
                 adj = curr.right
-                if grid[adj] == "." and adj not in path:
-                    heapq.heappush(q, (dist - 1, adj, path | {curr}))
             case _:
                 assert False, "what"
+
+        if grid[adj] == "." and adj not in path:
+            heapq.heappush(q, (dist - 1, adj, path | {curr}))
 
     return -max_path_len
 
@@ -116,8 +112,6 @@ def b(inp: Input) -> Any:
             if dist > max_path_len:
                 print("new longest path", dist)
                 max_path_len = dist
-            continue
-        if curr in path:
             continue
 
         for adj in graph[curr]:
