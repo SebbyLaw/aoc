@@ -41,43 +41,50 @@ def a(inp: Input) -> Any:
     grid = inp.into_grid()
     start = grid.points[0][1]
     goal = grid.points[-1][-2]
-    stack: list[tuple[int, Point, set[Point]]] = [(0, start, set())]
 
-    max_path_len = -1
-    while stack:
-        dist, curr, path = stack.pop()
-        if curr == goal:
-            if dist < max_path_len:
-                max_path_len = dist
-            continue
-        if curr in path:
-            continue
-
-        match grid[curr]:
-            case ".":
-                for adj in grid.adj(curr):
-                    if grid[adj] in ".^v<>" and adj not in path:
-                        stack.append((dist - 1, adj, path | {curr}))
+    graph = {}
+    for point in grid.coords():
+        match grid[point]:
+            case "#":
                 continue
+            case ".":
+                graph[point] = {adj: 1 for adj in grid.adj(point) if grid[adj] != "#"}
             case "^":
-                # must go up
-                adj = curr.up
+                graph[point] = {point.up: 1}
             case "v":
-                # must go down
-                adj = curr.down
+                graph[point] = {point.down: 1}
             case "<":
-                # must go left
-                adj = curr.left
+                graph[point] = {point.left: 1}
             case ">":
-                # must go right
-                adj = curr.right
+                graph[point] = {point.right: 1}
             case _:
                 assert False, "what"
 
-        if grid[adj] == "." and adj not in path:
-            stack.append((dist - 1, adj, path | {curr}))
+    for node in list(graph.keys()):
+        neighbors = graph[node]
+        if len(neighbors) == 2:
+            left, right = neighbors.keys()
+            graph[left].pop(node, None)
+            graph[right].pop(node, None)
+            graph[left][right] = graph[right][left] = neighbors[left] + neighbors[right]
+            del graph[node]
 
-    return -max_path_len
+    max_path_len = 0
+    stack: list[tuple[int, Point, set[Point]]] = [(0, start, set())]
+    while stack:
+        dist, curr, path = stack.pop()
+        if curr == goal:
+            if dist > max_path_len:
+                print("new longest path", dist)
+                max_path_len = dist
+            continue
+
+        for adj in graph[curr]:
+            if adj not in path:
+                stack.append((dist + graph[curr][adj], adj, path | {curr}))
+
+    assert max_path_len, "no path found"
+    return max_path_len
 
 
 @runs(
@@ -104,7 +111,7 @@ def b(inp: Input) -> Any:
             del graph[node]
 
     max_path_len = 0
-    stack = [(0, start, set())]
+    stack: list[tuple[int, Point, set[Point]]] = [(0, start, set())]
     while stack:
         dist, curr, path = stack.pop()
         if curr == goal:
