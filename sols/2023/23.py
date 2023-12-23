@@ -1,4 +1,3 @@
-import heapq
 from typing import Any
 from utils import *
 
@@ -42,11 +41,11 @@ def a(inp: Input) -> Any:
     grid = inp.into_grid()
     start = grid.points[0][1]
     goal = grid.points[-1][-2]
-    q: list[tuple[int, Point, set[Point]]] = [(0, start, set())]
+    stack: list[tuple[int, Point, set[Point]]] = [(0, start, set())]
 
     max_path_len = -1
-    while q:
-        dist, curr, path = heapq.heappop(q)
+    while stack:
+        dist, curr, path = stack.pop()
         if curr == goal:
             if dist < max_path_len:
                 max_path_len = dist
@@ -58,7 +57,7 @@ def a(inp: Input) -> Any:
             case ".":
                 for adj in grid.adj(curr):
                     if grid[adj] in ".^v<>" and adj not in path:
-                        heapq.heappush(q, (dist - 1, adj, path | {curr}))
+                        stack.append((dist - 1, adj, path | {curr}))
                 continue
             case "^":
                 # must go up
@@ -76,7 +75,7 @@ def a(inp: Input) -> Any:
                 assert False, "what"
 
         if grid[adj] == "." and adj not in path:
-            heapq.heappush(q, (dist - 1, adj, path | {curr}))
+            stack.append((dist - 1, adj, path | {curr}))
 
     return -max_path_len
 
