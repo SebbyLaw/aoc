@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import itertools
 from typing import Any
 from utils import *
-from z3 import Solver, Int, IntNumRef
+from z3 import Solver, IntNumRef, Real
 
 tests = [
     test(
@@ -80,12 +80,14 @@ def a(inp: Input) -> Any:
     submit,
 )
 def b(inp: Input) -> Any:
-    fx, fy, fz = Int("fx"), Int("fy"), Int("fz")
-    fdx, fdy, fdz = Int("fdx"), Int("fdy"), Int("fdz")
+    fx, fy, fz = Real("fx"), Real("fy"), Real("fz")
+    fdx, fdy, fdz = Real("fdx"), Real("fdy"), Real("fdz")
 
     solver = Solver()
-    for idx, line in enumerate(inp.lines, 1):
-        t = Int(f"t{idx}")
+    # you only need 3 points of intersection to solve the system
+    # since the answer is a straight line
+    for idx, line in enumerate(inp.lines[:3], 1):
+        t = Real(f"t{idx}")
         x, y, z, dx, dy, dz = ints(line)
         solver.add(t >= 0)
         solver.add(x + dx * t == fx + fdx * t)
