@@ -34,13 +34,10 @@ frs: qnr lhk lsr
 )
 def a(inp: Input) -> Any:
     graph = networkx.Graph()
-    all_nodes = set()
     for line in inp.lines:
         name, connections = line.split(": ")
         for connection in connections.split():
             graph.add_edge(name, connection)
-            all_nodes.add(name)
-            all_nodes.add(connection)
 
     # networkx has this built in
     for edge in networkx.minimum_edge_cut(graph):
