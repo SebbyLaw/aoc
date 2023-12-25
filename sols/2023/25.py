@@ -42,6 +42,12 @@ def a(inp: Input) -> Any:
             all_nodes.add(name)
             all_nodes.add(connection)
 
+    # networkx has this built in
+    for edge in networkx.minimum_edge_cut(graph):
+        graph.remove_edge(*edge)
+
+    return math.prod(map(len, networkx.connected_components(graph)))
+
     counter = Counter()
 
     # we need this function so we can count both (a, b) and (b, a) as the same edge
