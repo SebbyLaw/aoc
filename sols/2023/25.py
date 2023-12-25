@@ -44,11 +44,15 @@ def a(inp: Input) -> Any:
 
     counter = Counter()
 
+    # we need this function so we can count both (a, b) and (b, a) as the same edge
     def shs(s1: str, s2: str, /) -> tuple[str, str]:
         if s1 < s2:
             return s1, s2
         return s2, s1
 
+    # since this is aoc, the graph is guaranteed to be fully connected and need exactly 3 edges removed
+    # this means we can simply find the "most commonly traversed" edges
+    # count all the edges by traversing from everywhere to everywhere
     for path in networkx.all_pairs_dijkstra_path(graph):
         for p in path[1].values():
             for node in more_itertools.sliding_window(p, 2):
