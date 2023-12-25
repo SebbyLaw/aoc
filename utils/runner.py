@@ -52,7 +52,7 @@ class _ColorFormatter(logging.Formatter):
         return output
 
 
-level = logging.DEBUG
+level = logging.INFO
 handler = logging.StreamHandler()
 
 log = logging.getLogger()
@@ -60,7 +60,7 @@ log.setLevel(level)
 handler.setFormatter(_ColorFormatter())
 log.handlers = [handler]
 
-logging.getLogger("aocd").setLevel(logging.INFO)
+logging.getLogger("aocd").setLevel(logging.DEBUG)
 
 
 # region: auto run and submit
@@ -78,7 +78,7 @@ class RunnerLog:
 
     def log_input(self, inp: Input, /) -> None:
         self.log.info("====================")
-        self.log.info(f"{self.name.title()} input:\n\x1b[0;34m{inp}")
+        self.log.info(f"{self.name.title()} input:\n\x1b[0;34m{repr(inp)[:300]}")
         self.log.info("====================")
 
     def __enter__(self):
