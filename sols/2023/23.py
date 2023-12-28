@@ -110,6 +110,13 @@ def b(inp: Input) -> Any:
             graph[left][right] = graph[right][left] = neighbors[left] + neighbors[right]
             del graph[node]
 
+    # if we reach the node right before the exit, only go to the exit
+    # this avoids many branches where we turn away from the exit,
+    # resulting in searching a tree with no exit
+    for node, neighbors in graph.items():
+        if goal in neighbors:
+            graph[node] = {goal: neighbors[goal]}
+
     max_path_len = 0
     stack: list[tuple[int, Point, set[Point]]] = [(0, start, set())]
     while stack:
