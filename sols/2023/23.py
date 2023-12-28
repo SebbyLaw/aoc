@@ -110,6 +110,7 @@ def b(inp: Input) -> Any:
             graph[left][right] = graph[right][left] = neighbors[left] + neighbors[right]
             del graph[node]
 
+    del graph[goal]
     # if we reach the node right before the exit, only go to the exit
     # this avoids many branches where we turn away from the exit,
     # resulting in searching a tree with no exit
@@ -118,18 +119,26 @@ def b(inp: Input) -> Any:
             graph[node] = {goal: neighbors[goal]}
 
     max_path_len = 0
-    stack: list[tuple[int, Point, set[Point]]] = [(0, start, set())]
-    while stack:
-        dist, curr, path = stack.pop()
-        if curr == goal:
-            if dist > max_path_len:
-                print("new longest path", dist)
-                max_path_len = dist
-            continue
-
-        for adj in graph[curr]:
+    stack: list[tuple[int, Point, set[Point]]] = []
+    dist = 0
+    curr = start
+    path = set()
+    while True:
+        neighbors = graph[curr]
+        for adj in neighbors:
             if adj not in path:
-                stack.append((dist + graph[curr][adj], adj, path | {curr}))
+                alt = dist + neighbors[adj]
+                if adj == goal:
+                    if alt > max_path_len:
+                        print("new longest path", alt)
+                        max_path_len = alt
+                else:
+                    np = path.copy()
+                    np.add(curr)
+                    stack.append((alt, adj, np))
 
-    assert max_path_len, "no path found"
-    return max_path_len
+        try:
+            dist, curr, path = stack.pop()
+        except IndexError:
+            assert max_path_len, "no path found"
+            return max_path_len
